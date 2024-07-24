@@ -1,19 +1,15 @@
 # Hotel-Management-System
 
-Simple hotel booking website with content management system. Users can book rooms for specific dates. Admin can create, update, and delete room details. Admin can manage everything in the app.
+Trang web đặt phòng khách sạn đơn giản với hệ thống quản lý nội dung. Người dùng có thể đặt phòng vào những ngày cụ thể. Quản trị viên có thể tạo, cập nhật và xóa thông tin phòng. Quản trị viên có thể quản lý mọi thứ trong ứng dụng.
 
-## Video
-<!--<a href="https://www.youtube.com/watch?v=rKwBxxVXWkM">click here..</a>-->
-https://github.com/tushar-2223/Hotel-Management-System/assets/87109400/08742fd7-5e7b-4459-90ef-c4e6b3e0cabd
-
-## Tech Stack 
+## Tech Stack
 
 ```sh
 HTML
 CSS
 JAVASCRIPT
 PHP
-BOOTSTRAP 
+BOOTSTRAP
 ```
 
 ## Requirements:
@@ -28,7 +24,6 @@ After clicking database click import and select the file "bluebirdhotel.sql"
 Open the link "http://localhost/Hotel-Management-System/" or "http://localhost/Hotel-Management-System-main/"
 Now register and login
 ```
-
 
 ### login page
 
