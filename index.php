@@ -1,242 +1,284 @@
 <?php
+require_once 'config.php';
+require_once 'auth.php';
+require_once 'middleware.php';
 
-include 'config.php';
-session_start();
+$error = '';
 
+// Kiểm tra timeout
+if (isset($_GET['timeout'])) {
+    $error = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_POST['login'])) {
+        $email = sanitize_input($_POST['email']);
+        $password = $_POST['password'];
+        $role = sanitize_input($_POST['role']);
+        
+        $result = $auth->login($email, $password, $role);
+        
+        if ($result['success']) {
+            redirect($result['redirect']);
+        } else {
+            $error = $result['message'];
+        }
+    }
+}
 ?>
-<!DOCTYPE html>
-<html lang="en">
 
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/login.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-    <!-- sweet alert -->
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <!-- aos animation -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <!-- loading bar -->
-    <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
-    <link rel="stylesheet" href="./css/flash.css">
-    <title>Hotel blue bird</title>
+    <title>BlueBird Hotel - Đăng nhập</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+        }
+        
+        .login-image {
+            flex: 1;
+            background: url('./image/hotel1.jpg') center/cover;
+            position: relative;
+        }
+        
+        .login-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-form {
+            flex: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .role-selection {
+            text-align: center;
+        }
+        
+        .role-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .role-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+        }
+        
+        .role-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .role-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+        
+        .role-btn i {
+            font-size: 1.5rem;
+        }
+        
+        .role-btn span {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                margin: 20px;
+            }
+            
+            .login-image {
+                height: 200px;
+            }
+            
+            .login-form {
+                padding: 30px;
+            }
+            
+            .role-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .role-btn {
+                min-width: 150px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-    <!--  carousel -->
-    <section id="carouselExampleControls" class="carousel slide carousel_section" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img class="carousel-image" src="./image/hotel1.jpg">
-            </div>
-            <div class="carousel-item">
-                <img class="carousel-image" src="./image/hotel2.jpg">
-            </div>
-            <div class="carousel-item">
-                <img class="carousel-image" src="./image/hotel3.jpg">
-            </div>
-            <div class="carousel-item">
-                <img class="carousel-image" src="./image/hotel4.jpg">
-            </div>
-        </div>
-    </section>
-
-    <!-- main section -->
-    <section id="auth_section">
-
-        <div class="logo">
-            <img class="bluebirdlogo" src="./image/bluebirdlogo.png" alt="logo">
-            <p>BLUEBIRD</p>
-        </div>
-
-        <div class="auth_container">
-            <!--============ login =============-->
-
-            <div id="Log_in">
-                <h2>Log In</h2>
-                <div class="role_btn">
-                    <div class="btns active">User</div>
-                    <div class="btns">Staff</div>
+    <div class="login-container">
+        <div class="login-image"></div>
+        <div class="login-form">
+                            <div class="logo">
+                    <img src="./image/bluebirdlogo.png" alt="BlueBird Hotel">
+                    <h1>BlueBird Hotel</h1>
+                    <p class="text-muted">Chào mừng bạn đến với chúng tôi</p>
                 </div>
-
-                <!-- // ==userlogin== -->
-                <?php 
-                if (isset($_POST['user_login_submit'])) {
-                    $Email = $_POST['Email'];
-                    $Password = $_POST['Password'];
-
-                    $sql = "SELECT * FROM signup WHERE Email = '$Email' AND Password = BINARY'$Password'";
-                    $result = mysqli_query($conn, $sql);
-
-                    if ($result->num_rows > 0) {
-                        $_SESSION['usermail']=$Email;
-                        $Email = "";
-                        $Password = "";
-                        header("Location: home.php");
-                    } else {
-                        echo "<script>swal({
-                            title: 'Something went wrong',
-                            icon: 'error',
-                        });
-                        </script>";
-                    }
-                }
-                ?>
-                <form class="user_login authsection active" id="userlogin" action="" method="POST">
-                    <div class="form-floating">
-                        <input type="text" class="form-control" name="Username" placeholder=" ">
-                        <label for="Username">Username</label>
-                    </div>
-                    <div class="form-floating">
-                        <input typuser_logine="email" class="form-control" name="Email" placeholder=" ">
-                        <label for="Email">Email</label>
-                    </div>
-                    <div class="form-floating">
-                        <input type="password" class="form-control" name="Password" placeholder=" ">
-                        <label for="Password">Password</label>
-                    </div>
-                    <button type="submit" name="user_login_submit" class="auth_btn">Log in</button>
-
-                    <div class="footer_line">
-                        <h6>Don't have an account? <span class="page_move_btn" onclick="signuppage()">sign up</span></h6>
-                    </div>
-                </form>
                 
-                <!-- == Emp Login == -->
-                <?php              
-                    if (isset($_POST['Emp_login_submit'])) {
-                        $Email = $_POST['Emp_Email'];
-                        $Password = $_POST['Emp_Password'];
-
-                        $sql = "SELECT * FROM emp_login WHERE Emp_Email = '$Email' AND Emp_Password = BINARY'$Password'";
-                        $result = mysqli_query($conn, $sql);
-
-                        if ($result->num_rows > 0) {
-                            $_SESSION['usermail']=$Email;
-                            $Email = "";
-                            $Password = "";
-                            header("Location: admin/admin.php");
-                        } else {
-                            echo "<script>swal({
-                                title: 'Something went wrong',
-                                icon: 'error',
-                            });
-                            </script>";
-                        }
-                    }
-                ?> 
-                <form class="employee_login authsection" id="employeelogin" action="" method="POST">
-                    <div class="form-floating">
-                        <input type="email" class="form-control" name="Emp_Email" placeholder=" ">
-                        <label for="floatingInput">Email</label>
+                <!-- Role Selection -->
+                <div class="role-selection mb-4">
+                    <div class="role-buttons">
+                        <button type="button" class="role-btn active" data-role="user">
+                            <i class="fas fa-user"></i>
+                            <span>Khách hàng</span>
+                        </button>
+                        <button type="button" class="role-btn" data-role="staff">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Admin</span>
+                        </button>
                     </div>
-                    <div class="form-floating">
-                        <input type="password" class="form-control" name="Emp_Password" placeholder=" ">
-                        <label for="floatingPassword">Password</label>
-                    </div>
-                    <button type="submit" name="Emp_login_submit" class="auth_btn">Log in</button>
-                </form>
-                
-            </div>
-
-            <!--============ signup =============-->
-            <?php       
-                if (isset($_POST['user_signup_submit'])) {
-                    $Username = $_POST['Username'];
-                    $Email = $_POST['Email'];
-                    $Password = $_POST['Password'];
-                    $CPassword = $_POST['CPassword'];
-
-                    if($Username == "" || $Email == "" || $Password == ""){
-                        echo "<script>swal({
-                            title: 'Fill the proper details',
-                            icon: 'error',
-                        });
-                        </script>";
-                    }
-                    else{
-                        if ($Password == $CPassword) {
-                            $sql = "SELECT * FROM signup WHERE Email = '$Email'";
-                            $result = mysqli_query($conn, $sql);
-    
-                            if ($result->num_rows > 0) {
-                                echo "<script>swal({
-                                    title: 'Email already exits',
-                                    icon: 'error',
-                                });
-                                </script>";
-                            } else {
-                                $sql = "INSERT INTO signup (Username,Email,Password) VALUES ('$Username', '$Email', '$Password')";
-                                $result = mysqli_query($conn, $sql);
-    
-                                if ($result) {
-                                    $_SESSION['usermail']=$Email;
-                                    $Username = "";
-                                    $Email = "";
-                                    $Password = "";
-                                    $CPassword = "";
-                                    header("Location: home.php");
-                                } else {
-                                    echo "<script>swal({
-                                        title: 'Something went wrong',
-                                        icon: 'error',
-                                    });
-                                    </script>";
-                                }
-                            }
-                        } else {
-                            echo "<script>swal({
-                                title: 'Password does not matched',
-                                icon: 'error',
-                            });
-                            </script>";
-                        }
-                    }
+                </div>
+            
+            <?php if ($error): ?>
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+            
+                            <form method="POST" action="">
+                    <input type="hidden" name="role" id="selected_role" value="user">
                     
-                }
-            ?>
-            <div id="sign_up">
-                <h2>Sign Up</h2>
-
-                <form class="user_signup" id="usersignup" action="" method="POST">
-                    <div class="form-floating">
-                        <input type="text" class="form-control" name="Username" placeholder=" ">
-                        <label for="Username">Username</label>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
-                    <div class="form-floating">
-                        <input type="email" class="form-control" name="Email" placeholder=" ">
-                        <label for="Email">Email</label>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i> Mật khẩu
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
-                    <div class="form-floating">
-                        <input type="password" class="form-control" name="Password" placeholder=" ">
-                        <label for="Password">Password</label>
-                    </div>
-                    <div class="form-floating">
-                        <input type="password" class="form-control" name="CPassword" placeholder=" ">
-                        <label for="CPassword">Confirm Password</label>
-                    </div>
-
-                    <button type="submit" name="user_signup_submit" class="auth_btn">Sign up</button>
-
-                    <div class="footer_line">
-                        <h6>Already have an account? <span class="page_move_btn" onclick="loginpage()">Log in</span></h6>
-                    </div>
+                    
+                    <button type="submit" name="login" class="btn btn-login w-100">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </button>
                 </form>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">Chưa có tài khoản? 
+                    <a href="register.php" class="text-decoration-none">Đăng ký ngay</a>
+                </p>
             </div>
-    </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Role selection functionality
+        const roleButtons = document.querySelectorAll('.role-btn');
+        const selectedRoleInput = document.getElementById('selected_role');
+        
+        roleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                roleButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Update hidden input value
+                const role = this.getAttribute('data-role');
+                selectedRoleInput.value = role;
+            });
+        });
+    </script>
 </body>
-
-
-<script src="./javascript/index.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
-<!-- aos animation-->
-<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-<script>
-    AOS.init();
-</script>
 </html>
 

@@ -1,6 +1,6 @@
 <?php
 
-include '../config.php';
+include 'config_admin.php';
 
 $id = $_GET['id'];
 

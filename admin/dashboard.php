@@ -1,6 +1,5 @@
 <?php
-    session_start();
-    include '../config.php';
+    include 'config_admin.php';
 
     // roombook
     $roombooksql ="Select * from roombook";

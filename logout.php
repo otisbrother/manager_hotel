@@ -1,8 +1,7 @@
-<?php 
+<?php
+require_once 'auth.php';
 
-session_start();
-session_destroy();
-
-header("Location: index.php")
-
+$result = $auth->logout();
+header("Location: " . $result['redirect']);
+exit();
 ?>
