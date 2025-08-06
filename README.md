@@ -137,12 +137,3 @@ bluebird-hotel/
 - ✅ **Mã hóa dữ liệu** - Thông tin nhạy cảm được mã hóa
 - ✅ **Hiển thị có kiểm soát** - Chỉ hiển thị khi cần thiết
 
-
-
----
-
-⭐ Nếu dự án này hữu ích, hãy cho chúng tôi một star!
-
----
-
-*Made with ❤️ by [Your Name]*
