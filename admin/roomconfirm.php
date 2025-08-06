@@ -4,11 +4,13 @@ include '../config.php';
 
 $id = $_GET['id'];
 
-$sql ="Select * from roombook where id = '$id'";
-$re = mysqli_query($conn,$sql);
-while($row=mysqli_fetch_array($re))
-{
-	$Name = $row['Name'];
+// Lấy thông tin đặt phòng
+$stmt = $conn->prepare("SELECT * FROM roombook WHERE id = ?");
+$stmt->execute([$id]);
+$row = $stmt->fetch();
+
+if ($row) {
+    $Name = $row['Name'];
     $Email = $row['Email'];
     $Country = $row['Country'];
     $Phone = $row['Phone'];
@@ -22,13 +24,13 @@ while($row=mysqli_fetch_array($re))
     $stat = $row['stat'];
 }
 
-
 if($stat == "NotConfirm")
 {
     $st = "Confirm";
 
-    $sql = "UPDATE roombook SET stat = '$st' WHERE id = '$id'";
-    $result = mysqli_query($conn,$sql);
+    // Cập nhật trạng thái
+    $stmt = $conn->prepare("UPDATE roombook SET stat = ? WHERE id = ?");
+    $result = $stmt->execute([$st, $id]);
 
     if($result){
 
@@ -95,11 +97,13 @@ if($stat == "NotConfirm")
 
         $fintot = $ttot + $mepr + $btot;
 
-        $psql = "INSERT INTO payment(id,Name,Email,RoomType,Bed,NoofRoom,cin,cout,noofdays,roomtotal,bedtotal,meal,mealtotal,finaltotal) VALUES ('$id', '$Name', '$Email', '$RoomType', '$Bed', '$NoofRoom', '$cin', '$cout', '$noofday', '$ttot', '$btot', '$Meal', '$mepr', '$fintot')";
-
-        mysqli_query($conn,$psql);
+        // Thêm vào bảng payment
+        $psql = "INSERT INTO payment(id,Name,Email,RoomType,Bed,NoofRoom,cin,cout,noofdays,roomtotal,bedtotal,meal,mealtotal,finaltotal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $pstmt = $conn->prepare($psql);
+        $pstmt->execute([$id, $Name, $Email, $RoomType, $Bed, $NoofRoom, $cin, $cout, $noofday, $ttot, $btot, $Meal, $mepr, $fintot]);
 
         header("Location:roombook.php");
+        exit();
     }
 }
 // else
@@ -107,6 +111,5 @@ if($stat == "NotConfirm")
 //     echo "<script>alert('Guest Already Confirmed')</script>";
 //     header("Location:roombook.php");
 // }
-
 
 ?>

@@ -1,0 +1,212 @@
+/* CSS cho ảnh phòng và giường */
+.room-image-container {
+    position: relative;
+    display: inline-block;
+    margin: 15px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: all 0.4s ease;
+    background: white;
+    padding: 8px;
+}
+
+.room-image-container:hover {
+    transform: translateY(-15px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.room-image {
+    width: 280px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.bed-image {
+    width: 220px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+}
+
+.room-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+    color: white;
+    padding: 12px 15px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 0 0 15px 15px;
+    backdrop-filter: blur(10px);
+}
+
+.bed-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.95) 0%, rgba(28, 200, 138, 0.95) 100%);
+    color: white;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 0 0 12px 12px;
+    backdrop-filter: blur(10px);
+}
+
+/* Grid layout cho ảnh phòng - Layout ngang đẹp */
+.room-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    margin: 20px 0;
+}
+
+.bed-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.room-option, .bed-option {
+    flex: 0 0 auto;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.room-option:hover, .bed-option:hover {
+    transform: translateY(-10px);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .room-grid {
+        gap: 20px;
+    }
+    
+    .bed-grid {
+        gap: 15px;
+    }
+    
+    .room-image {
+        width: 240px;
+        height: 170px;
+    }
+    
+    .bed-image {
+        width: 180px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 768px) {
+    .room-grid, .bed-grid {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .room-image {
+        width: 280px;
+        height: 200px;
+    }
+    
+    .bed-image {
+        width: 220px;
+        height: 150px;
+    }
+}
+
+/* Animation cho ảnh */
+.room-image-container {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.room-option:nth-child(1) .room-image-container { animation-delay: 0.1s; }
+.room-option:nth-child(2) .room-image-container { animation-delay: 0.2s; }
+.room-option:nth-child(3) .room-image-container { animation-delay: 0.3s; }
+
+.bed-option:nth-child(1) .room-image-container { animation-delay: 0.1s; }
+.bed-option:nth-child(2) .room-image-container { animation-delay: 0.2s; }
+.bed-option:nth-child(3) .room-image-container { animation-delay: 0.3s; }
+.bed-option:nth-child(4) .room-image-container { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Hover effects */
+.room-image-container:hover .room-image,
+.room-image-container:hover .bed-image {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+/* Selection styles */
+.room-option.selected .room-image-container,
+.bed-option.selected .room-image-container {
+    border: 4px solid #667eea;
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.4);
+    transform: translateY(-20px) scale(1.08);
+}
+
+.room-option.selected .room-image,
+.bed-option.selected .bed-image {
+    filter: brightness(1.1) contrast(1.1);
+}
+
+.room-option.selected .room-label,
+.bed-option.selected .bed-label {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 1) 0%, rgba(118, 75, 162, 1) 100%);
+    font-size: 18px;
+    padding: 15px 20px;
+}
+
+/* Price display */
+.room-price {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.95) 100%);
+    color: #667eea;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.bed-price {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.95) 100%);
+    color: #28a745;
+    padding: 6px 10px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+} 

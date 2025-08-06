@@ -3,18 +3,17 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Database configuration
+// Database configuration for admin (using mysqli for compatibility)
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'bluebirdhotel');
 
-// Create connection
-try {
-    $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+// Create mysqli connection for admin files
+$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
 }
 
 // Helper functions (only if not already defined)
@@ -39,4 +38,4 @@ if (!function_exists('redirect')) {
         exit();
     }
 }
-?>
+?> 
