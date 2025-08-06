@@ -137,19 +137,7 @@ bluebird-hotel/
 - ✅ **Mã hóa dữ liệu** - Thông tin nhạy cảm được mã hóa
 - ✅ **Hiển thị có kiểm soát** - Chỉ hiển thị khi cần thiết
 
-## 🤝 Đóng góp
 
-Chúng tôi rất hoan nghênh mọi đóng góp! Vui lòng:
-
-1. Fork dự án
-2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit thay đổi (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Mở Pull Request
-
-## 📄 License
-
-Dự án này được phân phối dưới giấy phép MIT. Xem file `LICENSE` để biết thêm chi tiết.
 
 ---
 
