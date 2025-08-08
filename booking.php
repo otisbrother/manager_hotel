@@ -57,7 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$name, $email, $phone, $room_type, $bed_type, $no_of_rooms, $check_in, $check_out, $days, $meal]);
         
         $booking_id = $conn->lastInsertId();
-        redirect("payment.php?booking_id=$booking_id");
+        $_SESSION['success'] = 'Đặt phòng thành công! Vui lòng chờ admin xác nhận để thanh toán.';
+        redirect("payment.php?booking_id=" . $booking_id);
     } catch(PDOException $e) {
         $message = 'Lỗi đặt phòng: ' . $e->getMessage();
     }

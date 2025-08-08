@@ -25,7 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt = $conn->prepare("INSERT INTO signup (Username, Email, Password) VALUES (?, ?, ?)");
                 $stmt->execute([$name, $email, $password]);
                 
-                $success = 'Đăng ký thành công! Vui lòng đăng nhập.';
+                $success = 'Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...';
+                // Sử dụng JavaScript để chuyển hướng với animation
+                echo "<script>
+                    setTimeout(function() {
+                        window.location.href = 'index.php';
+                    }, 2000);
+                </script>";
             }
         } catch(PDOException $e) {
             $error = 'Lỗi đăng ký: ' . $e->getMessage();
@@ -172,6 +178,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php if ($success): ?>
                 <div class="alert alert-success" role="alert">
                     <i class="fas fa-check-circle"></i> <?php echo $success; ?>
+                    <div class="mt-2">
+                        <div class="spinner-border spinner-border-sm text-success me-2" role="status">
+                            <span class="visually-hidden">Đang chuyển hướng...</span>
+                        </div>
+                        <span class="text-success">Đang chuyển hướng...</span>
+                    </div>
                 </div>
             <?php endif; ?>
             

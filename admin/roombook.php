@@ -282,6 +282,24 @@ if (session_status() == PHP_SESSION_NONE) {
 
     
     <!-- ================================================= -->
+    
+    <!-- Hiển thị thông báo -->
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success']; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> <?php echo $_SESSION['error']; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+    
     <div class="searchsection">
         <input type="text" name="search_bar" id="search_bar" placeholder="search..." onkeyup="searchFun()">
         <button class="adduser" id="adduser" onclick="adduseropen()"><i class="fa-solid fa-bookmark"></i> Add</button>

@@ -60,9 +60,20 @@ try {
     $booking = $stmt->fetch();
     
     if (!$booking) {
+        $_SESSION['error'] = 'Không tìm thấy đặt phòng!';
+        redirect('dashboard.php');
+    }
+    
+    // Kiểm tra trạng thái - chỉ cho phép thanh toán khi đã được xác nhận
+    if ($booking['stat'] === 'NotConfirm') {
+        $_SESSION['error'] = 'Đặt phòng của bạn đang chờ admin xác nhận. Vui lòng quay lại sau!';
+        redirect('dashboard.php');
+    } elseif ($booking['stat'] !== 'Confirm') {
+        $_SESSION['error'] = 'Chỉ có thể thanh toán khi đặt phòng đã được admin xác nhận!';
         redirect('dashboard.php');
     }
 } catch(PDOException $e) {
+    $_SESSION['error'] = 'Có lỗi xảy ra: ' . $e->getMessage();
     redirect('dashboard.php');
 }
 
@@ -71,11 +82,11 @@ $message = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $payment_method = sanitize_input($_POST['payment_method']);
     
-    if ($payment_method === 'vietqr') {
-        // Xử lý thanh toán VietQR
+    if ($payment_method === 'vietqr' || $payment_method === 'bank_transfer') {
+        // Xử lý thanh toán VietQR và Chuyển khoản
         try {
             // Cập nhật trạng thái thanh toán
-            $stmt = $conn->prepare("UPDATE roombook SET stat = 'Confirm' WHERE id = ?");
+            $stmt = $conn->prepare("UPDATE roombook SET stat = 'Paid' WHERE id = ?");
             $stmt->execute([$booking_id]);
             
             // Lưu thông tin thanh toán
@@ -116,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         try {
             // Cập nhật trạng thái thanh toán
-            $stmt = $conn->prepare("UPDATE roombook SET stat = 'Confirm' WHERE id = ?");
+            $stmt = $conn->prepare("UPDATE roombook SET stat = 'Paid' WHERE id = ?");
             $stmt->execute([$booking_id]);
             
             // Lưu thông tin thanh toán
@@ -159,6 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Thanh toán - BlueBird Hotel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/payment-status.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #667eea;
@@ -385,14 +397,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <p class="mb-0">Hoàn tất đặt phòng của bạn</p>
                         </div>
                         
-                        <div class="payment-content">
-                            <?php if ($message == 'success'): ?>
-                                <div class="success-message">
-                                    <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
-                                    <h4>Thanh toán thành công!</h4>
-                                    <p>Đặt phòng của bạn đã được xác nhận. Chúng tôi sẽ gửi email xác nhận sớm nhất.</p>
-                                    <a href="dashboard.php" class="btn btn-custom">Về Dashboard</a>
-                                </div>
+                                                 <div class="payment-content">
+                             <?php if (isset($_SESSION['success'])): ?>
+                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                     <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success']; ?>
+                                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                 </div>
+                                 <?php unset($_SESSION['success']); ?>
+                             <?php endif; ?>
+                             
+                             <?php if ($message == 'success'): ?>
+                                 <!-- Success Modal -->
+                                 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                                     <div class="modal-dialog modal-dialog-centered">
+                                         <div class="modal-content">
+                                             <div class="modal-header bg-success text-white">
+                                                 <h5 class="modal-title" id="successModalLabel">
+                                                     <i class="fas fa-check-circle"></i> Thanh toán thành công!
+                                                 </h5>
+                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                             </div>
+                                             <div class="modal-body text-center">
+                                                 <div class="mb-4">
+                                                     <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                                                     <h4 class="text-success">Thanh toán thành công!</h4>
+                                                     <p class="text-muted">Đặt phòng của bạn đã được xác nhận và thanh toán hoàn tất.</p>
+                                                 </div>
+                                                 <div class="alert alert-info">
+                                                     <h6><i class="fas fa-info-circle"></i> Thông tin đặt phòng</h6>
+                                                     <p class="mb-1"><strong>Mã đặt phòng:</strong> #<?php echo $booking_id; ?></p>
+                                                     <p class="mb-1"><strong>Tổng tiền:</strong> <?php echo number_format(calculateTotalPrice($booking), 0, ',', '.'); ?> VNĐ</p>
+                                                     <p class="mb-0"><strong>Phương thức:</strong> <?php echo ucfirst($payment_method); ?></p>
+                                                 </div>
+                                             </div>
+                                             <div class="modal-footer justify-content-center">
+                                                 <a href="dashboard.php" class="btn btn-success">
+                                                     <i class="fas fa-home"></i> Về Dashboard
+                                                 </a>
+                                                 <a href="my-bookings.php" class="btn btn-outline-primary">
+                                                     <i class="fas fa-list"></i> Xem đặt phòng
+                                                 </a>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 
+                                 <script>
+                                     // Hiển thị modal thành công
+                                     document.addEventListener('DOMContentLoaded', function() {
+                                         var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                                         successModal.show();
+                                     });
+                                 </script>
                             <?php else: ?>
                                 <?php if ($message): ?>
                                     <div class="alert alert-danger" role="alert">
@@ -516,19 +572,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                     <i class="fas fa-eye"></i> Hiển thị thông tin thanh toán
                                                 </button>
                                             </div>
+                                                                                          <div class="alert alert-info mt-3">
+                                                  <i class="fas fa-info-circle"></i>
+                                                  <strong>Lưu ý:</strong> Sau khi quét mã QR và thanh toán thành công, vui lòng nhấn nút "Đặt phòng" bên dưới để xác nhận thanh toán.
+                                              </div>
                                         </div>
                                     </div>
                                     
-                                    <!-- Bank Transfer Info -->
-                                    <div id="bankTransferInfo" style="display: none;">
-                                        <div class="alert alert-info">
-                                            <h6><i class="fas fa-university"></i> Thông tin chuyển khoản</h6>
-                                            <p><strong>Ngân hàng:</strong> Vietcombank</p>
-                                            <p><strong>Số tài khoản:</strong> 1234567890</p>
-                                            <p><strong>Chủ tài khoản:</strong> BlueBird Hotel</p>
-                                            <p><strong>Nội dung:</strong> Thanh toan booking <?php echo $booking_id; ?></p>
-                                        </div>
-                                    </div>
+                                                                         <!-- Bank Transfer Info -->
+                                     <div id="bankTransferInfo" style="display: none;">
+                                         <div class="alert alert-info">
+                                             <h6><i class="fas fa-university"></i> Thông tin chuyển khoản</h6>
+                                             <p><strong>Ngân hàng:</strong> Vietcombank</p>
+                                             <p><strong>Số tài khoản:</strong> 1234567890</p>
+                                             <p><strong>Chủ tài khoản:</strong> BlueBird Hotel</p>
+                                             <p><strong>Nội dung:</strong> Thanh toan booking <?php echo $booking_id; ?></p>
+                                             <p><strong>Số tiền:</strong> <?php echo number_format(calculateTotalPrice($booking), 0, ',', '.'); ?> VNĐ</p>
+                                         </div>
+                                                                                   <div class="alert alert-info">
+                                              <i class="fas fa-info-circle"></i>
+                                              <strong>Lưu ý:</strong> Sau khi chuyển khoản thành công, vui lòng nhấn nút "Đặt phòng" bên dưới để xác nhận thanh toán.
+                                          </div>
+                                     </div>
                                     
                                     <!-- COD Info -->
                                     <div id="codInfo" style="display: none;">
@@ -538,11 +603,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         </div>
                                     </div>
                                     
-                                    <div class="text-center mt-4">
-                                        <button type="submit" class="btn btn-custom btn-lg">
-                                            <i class="fas fa-lock"></i> Xác nhận thanh toán
+                                    <div class="text-center mt-4" id="submitButtons">
+                                        <div id="paymentStatus" class="alert alert-info" style="display: none;">
+                                            <i class="fas fa-spinner fa-spin"></i> Đang kiểm tra thanh toán...
+                                        </div>
+                                        <div id="paymentSuccess" class="alert alert-success" style="display: none;">
+                                            <i class="fas fa-check-circle"></i> Thanh toán thành công! Đang chuyển hướng...
+                                        </div>
+                                        <div id="paymentError" class="alert alert-danger" style="display: none;">
+                                            <i class="fas fa-exclamation-triangle"></i> <span id="errorMessage"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-success btn-lg" onclick="startPaymentCheck()">
+                                            <i class="fas fa-check"></i> Đã thanh toán - Kiểm tra
                                         </button>
-                                        <a href="booking.php" class="btn btn-outline-secondary btn-lg ms-2">
+                                        <a href="dashboard.php" class="btn btn-outline-secondary btn-lg ms-2">
                                             <i class="fas fa-arrow-left"></i> Quay lại
                                         </a>
                                     </div>
@@ -583,20 +657,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 bankTransferInfo.style.display = 'none';
                 codInfo.style.display = 'none';
                 
-                switch(methodType) {
-                    case 'credit_card':
-                        creditCardForm.style.display = 'block';
-                        break;
-                    case 'vietqr':
-                        vietqrInfo.style.display = 'block';
-                        break;
-                    case 'bank_transfer':
-                        bankTransferInfo.style.display = 'block';
-                        break;
-                    case 'cod':
-                        codInfo.style.display = 'block';
-                        break;
-                }
+                                 switch(methodType) {
+                     case 'credit_card':
+                         creditCardForm.style.display = 'block';
+                         break;
+                     case 'vietqr':
+                         vietqrInfo.style.display = 'block';
+                         break;
+                     case 'bank_transfer':
+                         bankTransferInfo.style.display = 'block';
+                         break;
+                     case 'cod':
+                         codInfo.style.display = 'block';
+                         break;
+                 }
             });
         });
         
@@ -645,26 +719,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         // Secure QR display function
         function showSecureQR() {
-            // Thông tin được mã hóa để bảo mật
-            const secureData = {
-                bank: 'MBBank',
-                account: '0395256163',
-                holder: 'NGUYEN HUY TOA',
-                qrUrl: 'https://img.vietqr.io/image/970422-0395256163-qr.png'
-            };
-            
-            // Hiển thị thông tin
-            document.querySelector('.bank-info').textContent = secureData.bank;
-            document.querySelector('.account-info').textContent = secureData.account;
-            document.querySelector('.holder-info').textContent = secureData.holder;
-            
-            // Hiển thị mã QR
-            const qrContainer = document.getElementById('qrCodeContainer');
-            const totalAmount = <?php echo calculateTotalPrice($booking); ?>;
             const bookingId = '<?php echo $booking_id; ?>';
+            const totalAmount = <?php echo calculateTotalPrice($booking); ?>;
             
+            // Tạo orderCode cho PayOS
+            const orderCode = 'BOOKING_' + bookingId;
+            
+            // Hiển thị thông tin PayOS
+            document.querySelector('.bank-info').textContent = 'MBBank';
+            document.querySelector('.account-info').textContent = '0395256163';
+            document.querySelector('.holder-info').textContent = 'NGUYEN HUY TOA';
+            
+            // Hiển thị mã QR demo (thay vì chờ PayOS)
+            const qrContainer = document.getElementById('qrCodeContainer');
             qrContainer.innerHTML = `
-                <img src="${secureData.qrUrl}?amount=${totalAmount}&addInfo=Thanh%20toan%20booking%20${bookingId}&accountName=NGUYEN%20HUY%20TOA" 
+                <img src="https://img.vietqr.io/image/970422-0395256163-qr.png?amount=${totalAmount}&addInfo=Thanh%20toan%20booking%20${bookingId}&accountName=NGUYEN%20HUY%20TOA" 
                      alt="VietQR MBBank" class="img-fluid" style="max-width: 300px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
             `;
             
@@ -680,7 +749,80 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 Vui lòng không chia sẻ mã QR này với người khác.
             `;
             qrContainer.parentNode.appendChild(securityNotice);
+            
+            // Không tự động bắt đầu kiểm tra - chỉ khi user bấm nút thanh toán
+            // startPaymentCheck(orderCode);
         }
+        
+        // Hàm tạo QR code qua PayOS
+        function createPayOSQR(orderCode, amount, bookingId) {
+            fetch('create_payos_qr.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `orderCode=${orderCode}&amount=${amount}&bookingId=${bookingId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const qrContainer = document.getElementById('qrCodeContainer');
+                    qrContainer.innerHTML = `
+                        <img src="${data.qrUrl}" alt="PayOS VietQR" class="img-fluid" style="max-width: 300px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    `;
+                } else {
+                    console.error('Error creating QR:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // Hàm kiểm tra thanh toán tự động
+        function startPaymentCheck() {
+            const bookingId = '<?php echo $booking_id; ?>';
+            const amount = <?php echo calculateTotalPrice($booking); ?>;
+            const paymentMethod = document.getElementById('payment_method').value;
+            const orderCode = 'BOOKING_' + bookingId;
+            
+            // Hiển thị trạng thái kiểm tra
+            document.getElementById('paymentStatus').style.display = 'block';
+            
+            // Demo: Simulate payment success after 5 seconds
+            setTimeout(() => {
+                // Simulate successful payment
+                fetch('demo_payment_test.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `booking_id=${bookingId}&action=simulate_payment`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Thanh toán thành công
+                        document.getElementById('paymentStatus').style.display = 'none';
+                        document.getElementById('paymentSuccess').style.display = 'block';
+                        
+                        // Chuyển hướng sau 3 giây
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.php?payment_success=1';
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }, 5000); // Demo: Chờ 5 giây rồi tự động thành công
+        }
+        
+
+        
+        
+         
+         
     </script>
 </body>
 </html> 

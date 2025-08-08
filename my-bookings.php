@@ -68,6 +68,8 @@ try {
     <title>Lịch sử đặt phòng - BlueBird Hotel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/booking-actions.css" rel="stylesheet">
+    <link href="css/payment-status.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
@@ -248,6 +250,22 @@ try {
             <!-- Main Content -->
             <div class="col-md-9 col-lg-10">
                 <div class="main-content">
+                    <?php if (isset($_SESSION['success'])): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success']; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <?php unset($_SESSION['success']); ?>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> <?php echo $_SESSION['error']; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <?php unset($_SESSION['error']); ?>
+                    <?php endif; ?>
+
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2><i class="fas fa-history"></i> Lịch sử đặt phòng</h2>
                         <a href="booking.php" class="btn btn-custom">
@@ -313,11 +331,20 @@ try {
                                                 <small class="text-muted">Tổng chi phí</small>
                                             </div>
                                             <div class="btn-group">
-                                                <a href="booking-detail.php?id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                <a href="booking-detail.php?id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <?php if (($booking['stat'] ?? 'NotConfirm') == 'NotConfirm'): ?>
-                                                    <a href="payment.php?booking_id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-success">
+                                                <?php if ($booking['stat'] !== 'Confirm'): ?>
+                                                    <a href="booking-edit.php?id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-outline-warning" title="Sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="confirmDelete(<?php echo $booking['id']; ?>)" title="Xóa">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                <?php if ($booking['stat'] === 'Confirm'): ?>
+                                                    <a href="payment.php?booking_id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-payment" title="Thanh toán">
                                                         <i class="fas fa-credit-card"></i>
                                                     </a>
                                                 <?php endif; ?>
@@ -334,5 +361,19 @@ try {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Form xóa ẩn -->
+    <form id="deleteForm" method="POST" action="booking-delete.php" style="display: none;">
+        <input type="hidden" name="booking_id" id="deleteBookingId">
+    </form>
+
+    <script>
+        function confirmDelete(bookingId) {
+            if (confirm('Bạn có chắc chắn muốn xóa đặt phòng này? Hành động này không thể hoàn tác.')) {
+                document.getElementById('deleteBookingId').value = bookingId;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+    </script>
 </body>
 </html> 

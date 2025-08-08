@@ -75,6 +75,7 @@ $user_name = $_SESSION['user_name'];
     <title>Chi tiết đặt phòng - BlueBird Hotel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/payment-status.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #667eea;
@@ -458,9 +459,9 @@ $user_name = $_SESSION['user_name'];
                                         </div>
                                     </div>
                                     
-                                    <?php if (($booking['stat'] ?? 'NotConfirm') == 'NotConfirm'): ?>
+                                    <?php if ($booking['stat'] === 'Confirm'): ?>
                                         <div class="text-center mt-3">
-                                            <a href="payment.php?booking_id=<?php echo $booking['id']; ?>" class="btn btn-custom">
+                                            <a href="payment.php?booking_id=<?php echo $booking['id']; ?>" class="btn btn-payment">
                                                 <i class="fas fa-credit-card"></i> Thanh toán ngay
                                             </a>
                                         </div>

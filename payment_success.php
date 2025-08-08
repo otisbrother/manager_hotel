@@ -138,11 +138,11 @@ if ($resultCode == 0) {
                 <?php endif; ?>
                 
                 <div class="mt-4">
-                    <a href="payment.php?booking_id=<?php echo $orderId; ?>" class="btn btn-custom me-2">
-                        <i class="fas fa-redo"></i> Thử lại
+                    <a href="my-bookings.php" class="btn btn-custom me-2">
+                        <i class="fas fa-list"></i> Xem đặt phòng
                     </a>
-                    <a href="my-bookings.php" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Quay lại
+                    <a href="dashboard.php" class="btn btn-outline-secondary">
+                        <i class="fas fa-home"></i> Về Dashboard
                     </a>
                 </div>
             <?php endif; ?>
